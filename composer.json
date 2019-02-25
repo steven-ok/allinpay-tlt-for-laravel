@@ -1,0 +1,18 @@
+{
+  "name": "xiangdangdang/allinpay",
+  "description": "通联支付 通联通 laravel 快速开发扩展",
+  "require": {
+    "ext-simplexml": "*",
+    "guzzlehttp/guzzle": "~6.0"
+  },
+  "autoload": {
+    "psr-4": {"XiangDangDang\\AllInPayTlt\\": "src/"}
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "XiangDangDang\\AllInPayTlt\\Providers\\AllInPayServiceProvider"
+      ]
+    }
+  }
+}
