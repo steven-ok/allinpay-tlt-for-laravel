@@ -142,9 +142,9 @@ abstract class BasePay
 
         // 添加 TRANS dom
         foreach ($parameters as $nodeName => $children) {
-            $pnode = $xml->addChild('TRANS');
+            $pnode = $xml->addChild($nodeName);
             foreach ($children as $key => $value) {
-                $pnode->addChild('key', $value);
+                $pnode->addChild($key, $value);
             }
         }
 
