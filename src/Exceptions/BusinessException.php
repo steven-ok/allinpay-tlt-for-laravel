@@ -8,7 +8,6 @@
 
 namespace XiangDangDang\AllInPayTlt\Exceptions;
 
-
 use Throwable;
 
 class BusinessException extends \Exception

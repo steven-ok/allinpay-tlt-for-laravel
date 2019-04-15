@@ -14,9 +14,9 @@ class AllInPayServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/allinpaytlt.php', 'allinpaytlt.php'
+            __DIR__ . '/../config/allinpaytlt.php',
+            'allinpaytlt.php'
         );
 
         $this->app->bind('XiangDangDang\AllInPay\TltPay', function () {

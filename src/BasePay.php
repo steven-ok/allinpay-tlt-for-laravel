@@ -90,21 +90,27 @@ abstract class BasePay
             throw new ConfigException('通联公钥必须配置');
         }
         $this->publicKeyFile = config('allinpaytlt.public_key_file');
-
     }
 
     /**
      * 发起接口请求
      * @param string $trx_code
      * @param array $parameters
+     * @param string $req_sn
      * @return \SimpleXMLElement
      * @throws BusinessException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function sendRequest(string $trx_code, array $parameters)
+    public function sendRequest(string $trx_code, array $parameters, string $req_sn = null)
     {
         $client       = new Client();
-        $this->req_sn = uniqid('tl_');
+
+        if (empty($req_sn)) {
+            $this->req_sn = uniqid('tl_');
+        } else {
+            $this->req_sn = $req_sn;
+        }
+
         $response     = $client->request('POST', $this->api_url . "?MERCHANT_ID=" . $this->merchantId . "&REQ_SN=" . $this->req_sn, [
             'body'   => $this->generateXmlContext($trx_code, $parameters),
             'verify' => App::environment('local') ? false : true
@@ -142,10 +148,7 @@ abstract class BasePay
 
         // 添加 TRANS dom
         foreach ($parameters as $nodeName => $children) {
-            $pnode = $xml->addChild($nodeName);
-            foreach ($children as $key => $value) {
-                $pnode->addChild($key, $value);
-            }
+            $this->parameterSplicing($xml, $nodeName, $children);
         }
 
         //</INFO> 前加入空行
@@ -153,6 +156,34 @@ abstract class BasePay
 
         //数据验签
         return $this->signature($xml);
+    }
+
+    /**
+     * 签名组装
+     */
+    protected function parameterSplicing($node, $key, $value, $cur_key = null)
+    {
+        if (is_numeric($key)) {
+            $cnode = $node->addChild($cur_key);
+            foreach ($value as $k => $v) {
+                $this->parameterSplicing($cnode, $k, $v);
+            }
+        } else {
+            if (is_array($value)) {
+                if (empty($value[0])) {
+                    $childNode = $node->addChild($key);
+                    foreach ($value as $k => $v) {
+                        $this->parameterSplicing($childNode, $k, $v);
+                    }
+                } else {
+                    foreach ($value as $k => $v) {
+                        $this->parameterSplicing($node, $k, $v, $key);
+                    }
+                }
+            } else {
+                $node->addChild($key, $value);
+            }
+        }
     }
 
     /**
